@@ -9,6 +9,7 @@ import android.view.View
 import me.jacoblewis.spaceshooters.gengine.VirtualScreen
 import me.jacoblewis.spaceshooters.models.Backdrop
 import me.jacoblewis.spaceshooters.models.Enemy
+import me.jacoblewis.spaceshooters.models.Scoreboard
 import me.jacoblewis.spaceshooters.models.Spaceship
 import kotlin.math.max
 
@@ -17,6 +18,7 @@ class GameScene(context: Context) : SurfaceView(context), View.OnTouchListener {
     private val vScreen = VirtualScreen(720, 1280, VirtualScreen.FILL_ASPECT, this)
     private val backdrop = Backdrop()
     private val spaceship = Spaceship()
+    private val scoreboard = Scoreboard(0)
     private var counter = 0
 
     init {
@@ -25,16 +27,17 @@ class GameScene(context: Context) : SurfaceView(context), View.OnTouchListener {
         setOnTouchListener(this)
         vScreen.addRenderable(backdrop)
         vScreen.addRenderable(spaceship)
+        vScreen.addRenderable(scoreboard)
         vScreen.setOnFrameListener {
             if (counter++ % max(30, (Math.random() * 120).toInt()) == 0) {
-                vScreen.addRenderable(
-                    Enemy(
-                        Math.random().toFloat() * vScreen.width(),
-                        0f,
-                        max(10f, Math.random().toFloat() * 50f),
-                        1f
-                    )
+                val en = Enemy(
+                    Math.random().toFloat() * vScreen.width(),
+                    0f,
+                    max(10f, Math.random().toFloat() * 50f),
+                    1f
                 )
+                en.score = scoreboard::score
+                vScreen.addRenderable(en)
             }
         }
     }
