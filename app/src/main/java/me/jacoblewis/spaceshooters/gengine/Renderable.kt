@@ -1,8 +1,10 @@
 package me.jacoblewis.spaceshooters.gengine
 
 import android.graphics.Canvas
+import me.jacoblewis.spaceshooters.gengine.sim.HitTestable
 
-abstract class Renderable {
+abstract class Renderable(open var x: Float = 0f, open var y: Float = 0f) : HitTestable {
+    var bounds: Bounds = Bounds.None
     var isReady: Boolean = false
         private set
     var virtualScreen: VirtualScreen? = null
@@ -30,6 +32,11 @@ abstract class Renderable {
 
     fun addToScreen(renderable: Renderable) {
         virtualScreen?.addRenderable(renderable)
+    }
+
+    inline fun <reified T : Renderable> basicHitTestByType(): List<T> {
+        val items = findRenderablesByType<T>()
+        return items.filter { item -> convexHitTest(this, item) }
     }
 
     val Number.vx: Float

@@ -3,13 +3,15 @@ package me.jacoblewis.spaceshooters.models
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import me.jacoblewis.spaceshooters.gengine.Bounds
 import me.jacoblewis.spaceshooters.gengine.Renderable
-import kotlin.math.pow
+import me.jacoblewis.spaceshooters.gengine.jiggle
+import me.jacoblewis.spaceshooters.gengine.jiggleW
 import kotlin.reflect.KMutableProperty0
 
 data class Enemy(
-    val xPos: Float,
-    var yPos: Float,
+    override var x: Float,
+    override var y: Float,
     val radius: Float,
     var speed: Float,
     val hitField: Float = radius * 1.2f
@@ -20,30 +22,32 @@ data class Enemy(
     override fun initAssets() {
         whitePaint.color = Color.WHITE
         whitePaint.style = Paint.Style.FILL
+        bounds = Bounds.CircularBound(radius)
     }
 
     override fun drawNow(canvas: Canvas?, fps: Long) {
-        canvas?.drawCircle(xPos.vx, yPos.vy, radius.vs, whitePaint)
+        canvas?.drawCircle(x.vx, y.vy, radius.vs, whitePaint)
 
-        yPos += speed
-        if (yPos > vHeight) {
+        y += speed
+        if (y > vHeight) {
             removeFromScreen()
         }
-        val rays: List<Ray> = findRenderablesByType()
-        for (ray in rays) {
-            if ((ray.startX - xPos).pow(2) + (ray.yPos - yPos).pow(2) < hitField.pow(2)) {
-                // Enemy Hit!!!
-                ray.removeFromScreen()
-                score.set(score.get() + 1)
+        val rayHit = basicHitTestByType<Ray>().firstOrNull()
+        if (rayHit != null) {
+            // Enemy Hit!!!
+            rayHit.removeFromScreen()
+            score.set(score.get() + 1)
 
-                if (radius > 20f) {
-                    val en = Enemy(xPos, yPos, radius / 2, speed)
-                    addToScreen(en)
-                    en.score = score
-                }
-                removeFromScreen()
-                break
+            if (radius > 25f) {
+                val en1 = Enemy(x - jiggle(radius), y + jiggleW(radius / 2), radius / 2, speed)
+                en1.score = score
+                val en2 = Enemy(x + jiggle(radius), y + jiggleW(radius / 2), radius / 2, speed)
+                en2.score = score
+                // Add two new smaller enemies to the screen
+                addToScreen(en1)
+                addToScreen(en2)
             }
+            removeFromScreen()
         }
     }
 

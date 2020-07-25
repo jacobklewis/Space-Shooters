@@ -4,10 +4,11 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
+import me.jacoblewis.spaceshooters.gengine.Bounds
 import me.jacoblewis.spaceshooters.gengine.Renderable
 import me.jacoblewis.spaceshooters.gengine.translate
 
-data class Ray(val startX: Float, var yPos: Float) :
+data class Ray(override var x: Float, override var y: Float) :
     Renderable() {
     private val accentPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val rayPath = Path()
@@ -19,6 +20,7 @@ data class Ray(val startX: Float, var yPos: Float) :
         accentPaint.strokeWidth = 5.vs
         accentPaint.style = Paint.Style.STROKE
         createPath()
+        bounds = Bounds.CircularBound(1.vs)
     }
 
     private fun createPath() {
@@ -30,9 +32,9 @@ data class Ray(val startX: Float, var yPos: Float) :
 
     override fun drawNow(canvas: Canvas?, fps: Long) {
         val normalizedMult = 60 / fps
-        yPos -= raySpeed * normalizedMult
-        canvas?.drawPath(rayPath.translate(startX.vx, yPos.vy), accentPaint)
-        if (yPos < 0f) {
+        y -= raySpeed * normalizedMult
+        canvas?.drawPath(rayPath.translate(x.vx, y.vy), accentPaint)
+        if (y < 0f) {
             removeFromScreen()
         }
     }
